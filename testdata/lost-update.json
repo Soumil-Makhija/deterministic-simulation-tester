@@ -1,0 +1,555 @@
+{
+  "scenario": {
+    "model": "broken",
+    "config": {
+      "seed": 1,
+      "min_delay": 1,
+      "max_delay": 9,
+      "until": 100,
+      "max_events": 10000
+    },
+    "partition_start": 0,
+    "partition_end": 0
+  },
+  "trace": {
+    "version": 1,
+    "config": {
+      "seed": 1,
+      "min_delay": 1,
+      "max_delay": 9,
+      "until": 100,
+      "max_events": 10000
+    },
+    "choices": [
+      {
+        "label": "delay:a\u003eserver",
+        "bound": 9,
+        "value": 5
+      },
+      {
+        "label": "delay:b\u003eserver",
+        "bound": 9,
+        "value": 7
+      },
+      {
+        "label": "delay:server\u003ea",
+        "bound": 9,
+        "value": 3
+      },
+      {
+        "label": "delay:server\u003eb",
+        "bound": 9,
+        "value": 2
+      },
+      {
+        "label": "delay:a\u003eserver",
+        "bound": 9,
+        "value": 3
+      },
+      {
+        "label": "delay:b\u003eserver",
+        "bound": 9,
+        "value": 5
+      },
+      {
+        "label": "delay:a\u003eserver",
+        "bound": 9,
+        "value": 0
+      },
+      {
+        "label": "delay:b\u003eserver",
+        "bound": 9,
+        "value": 3
+      },
+      {
+        "label": "delay:server\u003ea",
+        "bound": 9,
+        "value": 0
+      },
+      {
+        "label": "delay:server\u003ea",
+        "bound": 9,
+        "value": 1
+      },
+      {
+        "label": "delay:server\u003eb",
+        "bound": 9,
+        "value": 6
+      },
+      {
+        "label": "delay:server\u003eb",
+        "bound": 9,
+        "value": 7
+      }
+    ],
+    "steps": [
+      {
+        "event": {
+          "id": 1,
+          "at": 0,
+          "kind": "input",
+          "to": "a",
+          "data": "start"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 2,
+          "at": 0,
+          "kind": "input",
+          "to": "b",
+          "data": "start"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 4,
+          "at": 6,
+          "kind": "message",
+          "from": "a",
+          "to": "server",
+          "data": "read"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 6,
+          "at": 8,
+          "kind": "message",
+          "from": "b",
+          "to": "server",
+          "data": "read"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 8,
+          "at": 10,
+          "kind": "message",
+          "from": "server",
+          "to": "a",
+          "data": "value:0"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "",
+            "write": 0,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 9,
+          "at": 11,
+          "kind": "message",
+          "from": "server",
+          "to": "b",
+          "data": "value:0"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 5,
+          "at": 12,
+          "kind": "timer",
+          "from": "a",
+          "to": "a",
+          "data": "retry"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 7,
+          "at": 12,
+          "kind": "timer",
+          "from": "b",
+          "to": "b",
+          "data": "retry"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 0,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 12,
+          "at": 13,
+          "kind": "message",
+          "from": "a",
+          "to": "server",
+          "data": "write:1"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 1,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 10,
+          "at": 14,
+          "kind": "message",
+          "from": "a",
+          "to": "server",
+          "data": "write:1"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 1,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 16,
+          "at": 14,
+          "kind": "message",
+          "from": "server",
+          "to": "a",
+          "data": "ack"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": true
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 1,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 14,
+          "at": 16,
+          "kind": "message",
+          "from": "b",
+          "to": "server",
+          "data": "write:1"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": true
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 1,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 17,
+          "at": 16,
+          "kind": "message",
+          "from": "server",
+          "to": "a",
+          "data": "ack"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": true
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 1,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 11,
+          "at": 17,
+          "kind": "message",
+          "from": "b",
+          "to": "server",
+          "data": "write:1"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": true
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": false
+          },
+          "server": {
+            "value": 1,
+            "applied": {}
+          }
+        }
+      },
+      {
+        "event": {
+          "id": 18,
+          "at": 23,
+          "kind": "message",
+          "from": "server",
+          "to": "b",
+          "data": "ack"
+        },
+        "state": {
+          "a": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": true
+          },
+          "audit": {},
+          "b": {
+            "model": "broken",
+            "phase": "write",
+            "write": 1,
+            "done": true
+          },
+          "server": {
+            "value": 1,
+            "applied": {}
+          }
+        }
+      }
+    ],
+    "pending": [
+      {
+        "id": 13,
+        "at": 24,
+        "kind": "timer",
+        "from": "a",
+        "to": "a",
+        "data": "retry"
+      },
+      {
+        "id": 15,
+        "at": 24,
+        "kind": "timer",
+        "from": "b",
+        "to": "b",
+        "data": "retry"
+      },
+      {
+        "id": 19,
+        "at": 25,
+        "kind": "message",
+        "from": "server",
+        "to": "b",
+        "data": "ack"
+      },
+      {
+        "id": 3,
+        "at": 100,
+        "kind": "input",
+        "to": "audit",
+        "data": "finish"
+      }
+    ],
+    "failure": "lost update: two acknowledged increments, server value = 1 (want 2)"
+  }
+}

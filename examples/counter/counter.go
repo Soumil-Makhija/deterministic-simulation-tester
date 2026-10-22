@@ -4,6 +4,7 @@
 package counter
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -163,7 +164,7 @@ func Replay(r Recording) error {
 		return err
 	}
 	tr, err := s.Run()
-	if err != nil && err.Error() != tr.Failure {
+	if errors.Is(err, sim.ErrReplayDiverged) || (err != nil && err.Error() != tr.Failure) {
 		return err
 	}
 	return nil

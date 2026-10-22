@@ -188,3 +188,92 @@ func TestConfigAndInvariant(t *testing.T) {
 		t.Fatal(tr, err)
 	}
 }
+
+func TestReplayDoesNotUsePRNG(t *testing.T) {
+	tr, _ := setup(t, nil, false).Run()
+	s := setup(t, &tr, false)
+	s.rng = 9999999
+	if _, err := s.Run(); err == nil || err.Error() != tr.Failure {
+		t.Fatal(err)
+	}
+}
+func TestDirectedPartitionAndTimerIsolation(t *testing.T) {
+	a := &recorder{handle: func(c *Context, e Event) error {
+		if e.Kind == "input" {
+			c.SendAfter(2, "b", "request")
+			c.After(2, "timer")
+		}
+		return nil
+	}}
+	b := &recorder{handle: func(c *Context, e Event) error { c.SendAfter(0, "a", "reply"); return nil }}
+	s, _ := New(config(), map[string]Node{"a": a, "b": b})
+	s.Link(0, "b", "a", true)
+	s.Inject(0, "a", "start")
+	tr, err := s.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(a.Seen, []string{"start", "timer"}) || !reflect.DeepEqual(b.Seen, []string{"request"}) {
+		t.Fatal(tr)
+	}
+}
+func TestReplayCorruption(t *testing.T) {
+	for _, mutate := range []func(*Trace){
+		func(t *Trace) { t.Version = 99 }, func(t *Trace) { t.Choices[0].Label = "wrong" }, func(t *Trace) { t.Choices[0].Bound++ }, func(t *Trace) { t.Choices[0].Value = t.Choices[0].Bound }, func(t *Trace) { t.Choices = nil }, func(t *Trace) { t.Pending = nil }, func(t *Trace) { t.Failure = "wrong" },
+	} {
+		tr, _ := setup(t, nil, false).Run()
+		mutate(&tr)
+		if tr.Version != 1 {
+			if _, err := Replay(tr, nil); err == nil {
+				t.Fatal("version accepted")
+			}
+			continue
+		}
+		if _, err := setup(t, &tr, false).Run(); err == nil || !strings.Contains(err.Error(), "diverged") {
+			t.Fatal(err)
+		}
+	}
+}
+func FuzzDeterminism(f *testing.F) {
+	f.Add(uint64(42), uint8(9))
+	f.Add(uint64(0), uint8(1))
+	f.Fuzz(func(t *testing.T, seed uint64, delay uint8) {
+		cfg := config()
+		cfg.Seed = seed
+		cfg.MaxDelay = int64(delay) + 1
+		makeSim := func(replay *Trace) *Simulator {
+			a := &recorder{handle: func(c *Context, e Event) error {
+				for i := 0; i < 8; i++ {
+					c.Send("b", fmt.Sprint(i))
+				}
+				return nil
+			}}
+			b := &recorder{}
+			var s *Simulator
+			var err error
+			if replay == nil {
+				s, err = New(cfg, map[string]Node{"a": a, "b": b})
+			} else {
+				s, err = Replay(*replay, map[string]Node{"b": b, "a": a})
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			s.Inject(0, "a", "start")
+			s.Link(3, "a", "b", true)
+			s.Link(8, "a", "b", false)
+			return s
+		}
+		tr, err := makeSim(nil).Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+		second, err := makeSim(nil).Run()
+		if err != nil || !reflect.DeepEqual(tr, second) {
+			t.Fatal("not deterministic", err)
+		}
+		if _, err := makeSim(&tr).Run(); err != nil {
+			t.Fatal(err)
+		}
+	})
+}

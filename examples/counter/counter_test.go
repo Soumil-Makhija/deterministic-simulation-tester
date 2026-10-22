@@ -55,3 +55,26 @@ func TestIncompleteHorizonIsFailure(t *testing.T) {
 		t.Fatal(r, err)
 	}
 }
+
+func TestFixedFaultMatrix(t *testing.T) {
+	for _, delay := range []int64{1, 3, 9, 20} {
+		for _, heal := range []int64{0, 1, 35, 90} {
+			for seed := uint64(1); seed <= 50; seed++ {
+				sc := Default(seed, "fixed")
+				sc.Config.MaxDelay = delay
+				sc.Config.Until = 250
+				sc.PartitionEnd = heal
+				if _, err := Run(sc); err != nil {
+					t.Fatalf("delay=%d heal=%d seed=%d: %v", delay, heal, seed, err)
+				}
+			}
+		}
+	}
+}
+func BenchmarkFixedCounter(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		if _, err := Run(Default(uint64(i), "fixed")); err != nil {
+			b.Fatal(err)
+		}
+	}
+}

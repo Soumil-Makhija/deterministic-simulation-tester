@@ -12,6 +12,9 @@ import (
 	"sort"
 )
 
+// ErrReplayDiverged means the recording does not match this execution.
+var ErrReplayDiverged = errors.New("replay diverged: choices, events, state, pending queue or failure differ")
+
 type Event struct {
 	ID      uint64 `json:"id"`
 	At      int64  `json:"at"`
@@ -230,13 +233,18 @@ func (s *Simulator) Run() (Trace, error) {
 	if s.err != nil {
 		s.trace.Failure = s.err.Error()
 	}
-	actual, marshalErr := json.Marshal(s.trace)
-	if marshalErr != nil {
-		return s.trace, marshalErr
-	}
-	expected, _ := json.Marshal(s.replay)
-	if s.replay != nil && (s.cursor != len(s.replay.Choices) || !bytes.Equal(actual, expected)) {
-		return s.trace, errors.New("replay diverged: choices, events, state, pending queue or failure differ")
+	if s.replay != nil {
+		actual, err := json.Marshal(s.trace)
+		if err != nil {
+			return s.trace, err
+		}
+		expected, err := json.Marshal(s.replay)
+		if err != nil {
+			return s.trace, fmt.Errorf("invalid replay trace: %w", err)
+		}
+		if s.cursor != len(s.replay.Choices) || !bytes.Equal(actual, expected) {
+			return s.trace, ErrReplayDiverged
+		}
 	}
 	return s.trace, s.err
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/Soumil-Makhija/deterministic-simulation-tester/examples/counter"
 )
@@ -19,7 +20,14 @@ func read(path string) (counter.Recording, error) {
 		return r, err
 	}
 	defer f.Close()
-	d := json.NewDecoder(io.LimitReader(f, 64<<20))
+	info, err := f.Stat()
+	if err != nil {
+		return r, err
+	}
+	if info.Size() > 64<<20 {
+		return r, errors.New("recording exceeds 64 MiB limit")
+	}
+	d := json.NewDecoder(io.LimitReader(f, (64<<20)+1))
 	d.DisallowUnknownFields()
 	if err = d.Decode(&r); err != nil {
 		return r, err
@@ -35,7 +43,20 @@ func save(path string, r counter.Recording) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, append(data, '\n'), 0644)
+	f, err := os.CreateTemp(filepath.Dir(path), ".dst-recording-*")
+	if err != nil {
+		return err
+	}
+	temp := f.Name()
+	defer os.Remove(temp)
+	if _, err = f.Write(append(data, '\n')); err != nil {
+		f.Close()
+		return err
+	}
+	if err = f.Close(); err != nil {
+		return err
+	}
+	return os.Rename(temp, path)
 }
 func run(args []string, out, errout io.Writer) int {
 	if len(args) == 0 {

@@ -52,3 +52,31 @@ func TestCLIInvalidInputs(t *testing.T) {
 		t.Fatal("trailing data accepted")
 	}
 }
+
+func TestCommittedRecording(t *testing.T) {
+	r, err := read("../../testdata/lost-update.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := counter.Replay(r); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestRecordingSizeAndUnknownFields(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "oversize.json")
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = f.Truncate((64 << 20) + 1); err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+	if _, err := read(path); err == nil {
+		t.Fatal("oversized file accepted")
+	}
+	os.WriteFile(path, []byte(`{"unknown":true}`), 0600)
+	if _, err := read(path); err == nil {
+		t.Fatal("unknown field accepted")
+	}
+}
